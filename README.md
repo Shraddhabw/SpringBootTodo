@@ -1,95 +1,81 @@
-# Todo Management System (Spring Boot REST API)
+# Todo Management System
 
-## 📖 Overview
-The **Todo Management System** is a Spring Boot REST API project designed to manage tasks efficiently with authentication and role-based authorization. The application follows a **layered architecture** (`Controller → Service → Repository`) and provides RESTful endpoints for performing CRUD operations on todos, along with task status management.
+A REST API built with Spring Boot for managing todo tasks with authentication and role-based authorization.
 
-Currently, the REST API implementation is complete, and integration of **Spring Security 6** for role-based access control is in progress.
+## Tech Stack
 
----
+- Java 17
+- Spring Boot 3
+- Spring Security 6
+- Spring Data JPA + Hibernate
+- MySQL
+- Maven
+- Lombok
+- ModelMapper
 
-## 🚀 Tech Stack
+## Getting Started
 
-- **Spring Boot 3** – Application framework
-- **Spring Security 6** – Authentication & role-based authorization
-- **Spring Data JPA (Hibernate 6)** – ORM and database access
-- **MySQL** – Relational database
-- **Maven** – Build and dependency management
-- **IntelliJ IDEA** – Development IDE
-- **Postman** – API testing tool
+### Prerequisites
+- Java 17+
+- MySQL
+- Maven
 
----
+### Setup
 
-## ⚙️ Features
-
-### ✅ Todo Management
-- Add Todo – Create new tasks
-- Get Todo – Retrieve a task by ID
-- Get All Todos – Retrieve all tasks
-- Update Todo – Modify existing tasks
-- Delete Todo – Remove tasks
-- Mark Complete/Incomplete – Update task status
-
-### 🔐 Role-Based Access Control (In Progress)
-#### Admin
-- Full CRUD access
-
-#### User
-- View tasks
-- Filter tasks by complete/incomplete status
-
----
-
-## 🏗️ Architecture
-
-The project follows a **layered architecture**:
-
-- **Controller Layer** – Handles HTTP requests and responses
-- **Service Layer** – Contains business logic
-- **Repository Layer** – Handles database interaction using JPA
-
-### Architecture Flow
-```text
-Client Request
-      ↓
-Controller Layer
-      ↓
-Service Layer
-      ↓
-Repository Layer
-      ↓
-MySQL Database
-```
-
-## 🔧 Setup & Installation
-
-### 1️⃣ Clone the Repository
-
+**1. Clone the repository**
 ```bash
-git clone https://github.com/your-Shraddhabw/todo-management.git
+git clone https://github.com/Shraddhabw/todo-management.git
 cd todo-management
 ```
-### 2️⃣ Configure MySQL Database
 
-Update the `application.properties` file:
+**2. Create database**
+```sql
+CREATE DATABASE todo_management;
+```
 
+**3. Configure `application.properties`**
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/todo_db
+spring.datasource.url=jdbc:mysql://localhost:3306/todo_management
 spring.datasource.username=root
 spring.datasource.password=yourpassword
-
 spring.jpa.hibernate.ddl-auto=update
 ```
-### 3️⃣ Build and Run the Project
 
+**4. Insert roles (run once after first startup)**
+```sql
+INSERT INTO roles (name) VALUES ('ROLE_USER');
+INSERT INTO roles (name) VALUES ('ROLE_ADMIN');
+```
+
+**5. Run the application**
 ```bash
 mvn spring-boot:run
 ```
-The application will start at:
+API runs at `http://localhost:8080`
 
-```bash
-http://localhost:8080
-```
-### 4️⃣ Test APIs
+## API Endpoints
 
-Use **Postman** or any API testing tool to test the endpoints.
+### Auth
+| Method | URL | Access |
+|---|---|---|
+| POST | `/api/auth/register` | Public |
+| POST | `/api/auth/login` | Public |
 
+### Todos
+| Method | URL | Access |
+|---|---|---|
+| POST | `/api/todos` | ADMIN |
+| GET | `/api/todos` | ADMIN, USER |
+| GET | `/api/todos/{id}` | ADMIN, USER |
+| PUT | `/api/todos/{id}` | ADMIN |
+| DELETE | `/api/todos/{id}` | ADMIN |
+| PATCH | `/api/todos/{id}/complete` | ADMIN, USER |
+| PATCH | `/api/todos/{id}/in-complete` | ADMIN, USER |
+
+## Authentication
+
+This API uses **HTTP Basic Auth**. Pass credentials in the Authorization header with every request.
+
+## Author
+
+**Shraddha** — [GitHub](https://github.com/Shraddhabw)
