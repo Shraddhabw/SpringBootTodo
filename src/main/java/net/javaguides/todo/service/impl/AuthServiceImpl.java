@@ -1,6 +1,7 @@
 package net.javaguides.todo.service.impl;
 
 import lombok.AllArgsConstructor;
+import net.javaguides.todo.Security.JwtTokenProvider;
 import net.javaguides.todo.dto.LoginDto;
 import net.javaguides.todo.dto.RegisterDto;
 import net.javaguides.todo.entity.Role;
@@ -28,10 +29,11 @@ public class AuthServiceImpl implements AuthService {
     private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
     private AuthenticationManager authenticationManager;
+    private JwtTokenProvider jwtTokenProvider;
+
     @Override
     public String register(RegisterDto registerDto) {
 
-        // Check if username already exists
         if (userRepository.existsByUsername(registerDto.getUsername())) {
             throw new TodoAPIException(HttpStatus.BAD_REQUEST, "Username already exists!");
         }
@@ -40,17 +42,15 @@ public class AuthServiceImpl implements AuthService {
             throw new TodoAPIException(HttpStatus.BAD_REQUEST, "Email already exists!");
         }
 
-        // Create new User object
         User user = new User();
         user.setName(registerDto.getName());
         user.setUsername(registerDto.getUsername());
         user.setEmail(registerDto.getEmail());
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
 
-        // Assign ROLE_USER by default
         Set<Role> roles = new HashSet<>();
         Role userRole = roleRepository.findByName("ROLE_USER")
-                .orElseThrow(() -> new RuntimeException("Role not found! Please insert ROLE_USER in roles table."));
+                .orElseThrow(() -> new RuntimeException("Role not found!"));
         roles.add(userRole);
         user.setRoles(roles);
 
@@ -62,10 +62,19 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public String login(LoginDto loginDto) {
 
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getUsernameOrEmail(),loginDto.getPassword()));
+        // Authenticate user
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginDto.getUsernameOrEmail(),
+                        loginDto.getPassword()
+                )
+        );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        return "User logged in successfully";
+        // Generate JWT token and return it
+        String token = jwtTokenProvider.generateToken(authentication);
+
+        return token;
     }
 }
